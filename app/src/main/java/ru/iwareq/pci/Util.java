@@ -22,15 +22,9 @@ public class Util {
 	}
 
 	public static Intent createInstallIntent(String apkPath) {
-		/*var intent = new Intent(Intent.ACTION_VIEW);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);*/
-
 		var storage = Environment.getExternalStorageDirectory().toString().replace("file:///", "");
 		var destination = storage + apkPath;
 		var uri = Uri.parse("file:///" + storage + apkPath);
-		//		intent.setDataAndType(uri, "application/vnd.android.package-archive");
-
 
 		var contentUri = FileProvider.getUriForFile(
 				SafRootHelper.getContext(),

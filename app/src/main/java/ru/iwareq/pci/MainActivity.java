@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -27,9 +26,7 @@ public class MainActivity extends AppCompatActivity {
 				Util.renameData(true);
 				Util.renameObb(true);
 
-				Toast.makeText(this, "Начало установки", Toast.LENGTH_LONG);
 				this.startActivity(Util.createInstallIntent(SafRootHelper.getApkInstallPath()));
-				Toast.makeText(this, "Готово", Toast.LENGTH_LONG);
 			});
 
 	private final ActivityResultLauncher<Intent> handleSelectedFile = this.registerForActivityResult(
@@ -90,15 +87,19 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void requestPermissions() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-			try {
-				var uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-				var intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
-				this.handleAllFilesAccessPermission.launch(intent);
-			} catch (Exception exception) {
-				var intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-				intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-				this.handleAllFilesAccessPermission.launch(intent);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			if (!Environment.isExternalStorageManager()) {
+				try {
+					var uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+					var intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+					this.handleAllFilesAccessPermission.launch(intent);
+				} catch (Exception exception) {
+					var intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+					intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+					this.handleAllFilesAccessPermission.launch(intent);
+				}
+			} else {
+				this.checkAndroidRootPermissions();
 			}
 		} else {
 			ActivityCompat.requestPermissions(this, new String[]{
@@ -106,23 +107,15 @@ public class MainActivity extends AppCompatActivity {
 					Manifest.permission.WRITE_EXTERNAL_STORAGE
 			}, 1);
 		}
-
-		ActivityCompat.requestPermissions(this, new String[]{
-				Manifest.permission.REQUEST_INSTALL_PACKAGES
-		}, 1);
-
-		this.checkAndroidRootPermissions();
 	}
 
 	private void checkAndroidRootPermissions() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			var permissions = this.getContentResolver().getPersistedUriPermissions();
-			if (permissions.size() == 2) {
-				SafRootHelper.setData(permissions.get(0).getUri());
-				SafRootHelper.setObb(permissions.get(1).getUri());
-			} else {
-				this.handleDataUri.launch(Util.createAndroidRootIntent(true));
-			}
+		var permissions = this.getContentResolver().getPersistedUriPermissions();
+		if (permissions.size() == 2) {
+			SafRootHelper.setData(permissions.get(0).getUri());
+			SafRootHelper.setObb(permissions.get(1).getUri());
+		} else {
+			this.handleDataUri.launch(Util.createAndroidRootIntent(true));
 		}
 	}
 
