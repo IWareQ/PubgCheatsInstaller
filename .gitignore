@@ -178,3 +178,4 @@ lint/tmp/
 *.hprof
 
 /.idea/git_toolbox_prj.xml
+/app/release/
