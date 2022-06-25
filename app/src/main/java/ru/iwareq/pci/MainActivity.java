@@ -38,18 +38,6 @@ public class MainActivity extends AppCompatActivity {
 					Log.e(TAG, String.valueOf(uriData));
 				}
 			});
-
-	private final ActivityResultLauncher<Intent> handleObbUri = this.registerForActivityResult(
-			new ActivityResultContracts.StartActivityForResult(), result -> {
-				var resolver = this.getContentResolver();
-
-				var uriData = result.getData().getData();
-				var flags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-				resolver.takePersistableUriPermission(uriData, flags);
-				this.registerSafRoot(uriData, false);
-			});
-
-
 	private final ActivityResultLauncher<Intent> handleDataUri = this.registerForActivityResult(
 			new ActivityResultContracts.StartActivityForResult(), result -> {
 				var resolver = this.getContentResolver();
@@ -58,12 +46,10 @@ public class MainActivity extends AppCompatActivity {
 				var flags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 				resolver.takePersistableUriPermission(uriData, flags);
 
-				var permissions = resolver.getPersistedUriPermissions();
-				Log.e(TAG, "handleDataUri size: " + permissions.size());
-				this.registerSafRoot(uriData, true);
+				//				var permissions = resolver.getPersistedUriPermissions();
+				//				Log.e(TAG, "handleDataUri size: " + permissions.size());
+				//				this.registerSafRoot(uriData, true);
 			});
-
-
 	private final ActivityResultLauncher<Intent> handleAllFilesAccesssPermission = this.registerForActivityResult(
 			new ActivityResultContracts.StartActivityForResult(), result ->
 					this.checkAndroidRootPermissions());
@@ -77,13 +63,19 @@ public class MainActivity extends AppCompatActivity {
 
 		this.requestPermissions();
 
-		//		binding.getObbAccess.setOnClickListener(listener -> this.startAndroidAccessDirectory("obb"));
+		binding.getObbAccess.setOnClickListener(listener -> {
+			handleDataUri.launch(this.getAndroidRootIntent(false, false));
+		});
 
 		//		binding.getDataAccess.setOnClickListener(listener -> this.startAndroidAccessDirectory("data"));
 
 		binding.selectApkFile.setOnClickListener(listener -> {
 			var permissions = this.getContentResolver().getPersistedUriPermissions();
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				permissions.forEach(perm -> SafRootHelper.setObb(perm.getUri()));
+			}
 			Log.e(TAG, "size: " + permissions.size());
+			renameObb(false);
 			//			rename(true);
 			/*var apkPicker = new Intent(Intent.ACTION_GET_CONTENT);
 			apkPicker.setType("application/*");
@@ -109,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 			}, 1);
 		}
 
-		this.checkAndroidRootPermissions();
+		//		this.checkAndroidRootPermissions();
 	}
 
 	private void checkAndroidRootPermissions() {
@@ -117,11 +109,11 @@ public class MainActivity extends AppCompatActivity {
 			var permissions = this.getContentResolver().getPersistedUriPermissions();
 			Log.e(TAG, "size: " + permissions.size());
 			if (permissions.size() == 4) {
-				SafRootHolder.setData(permissions.get(0).getUri());
-				SafRootHolder.setRenamedData(permissions.get(1).getUri());
+				SafRootHelper.setData(permissions.get(0).getUri());
+//				SafRootHolder.setRenamedData(permissions.get(1).getUri());
 
-				SafRootHolder.setObb(permissions.get(2).getUri());
-				SafRootHolder.setRenamedObb(permissions.get(3).getUri());
+				SafRootHelper.setObb(permissions.get(2).getUri());
+//				SafRootHolder.setRenamedObb(permissions.get(3).getUri());
 			} else {
 				this.handleDataUri.launch(this.getAndroidRootIntent(true, true));
 			}
@@ -141,53 +133,65 @@ public class MainActivity extends AppCompatActivity {
 		Log.e(TAG, "registerSafRoot size: " + permissions.size());
 		if (uri.toString().endsWith(".ig")) {
 			if (data) {
-				SafRootHolder.setData(uri);
+				SafRootHelper.setData(uri);
 				this.renameData(false);
 				this.handleDataUri.launch(this.getAndroidRootIntent(true, false));
 			} else {
-				SafRootHolder.setObb(uri);
+				SafRootHelper.setObb(uri);
 				this.renameObb(false);
 				this.handleObbUri.launch(this.getAndroidRootIntent(false, false));
 			}
 		} else {
 			if (data) {
-				SafRootHolder.setRenamedData(uri);
+//				SafRootHolder.setRenamedData(uri);
 				this.renameData(true);
 				this.handleObbUri.launch(this.getAndroidRootIntent(false, true));
 			} else {
-				SafRootHolder.setRenamedObb(uri);
+//				SafRootHolder.setRenamedObb(uri);
 				this.renameObb(true);
 			}
 		}
 	}
 
 	private void renameData(boolean toOfficialName) {
-		var treeUriData = !toOfficialName ? SafRootHolder.getData() : SafRootHolder.getRenamedData();
-		var dataDocument = DocumentFile.fromTreeUri(this, treeUriData);
+//		var treeUriData = !toOfficialName ? SafRootHolder.getData() : SafRootHolder.getRenamedData();
+		var dataDocument = DocumentFile.fromTreeUri(this, getUriAndroidRoot(true, toOfficialName, true));
 		if (dataDocument != null) {
 			dataDocument.renameTo(toOfficialName ? "com.tencent.ig" : "com.tencent.igg");
 		}
 	}
 
 	private void renameObb(boolean toOfficialName) {
-		var treeUriObb = !toOfficialName ? SafRootHolder.getObb() : SafRootHolder.getRenamedObb();
-		var obbDocument = DocumentFile.fromTreeUri(this, treeUriObb);
+//		var treeUriObb = !toOfficialName ? SafRootHolder.getObb() : SafRootHolder.getRenamedObb();
+		var obbDocument = DocumentFile.fromTreeUri(this, SafRootHelper.getObb());
 		if (obbDocument != null) {
-			obbDocument.renameTo(toOfficialName ? "com.tencent.ig" : "com.tencent.igg");
+			var nextFile = obbDocument.findFile("com.tencent.ig");
+			nextFile.renameTo("com.tencent.igg");
+//			obbDocument.renameTo(toOfficialName ? "com.tencent.ig" : "com.tencent.igg");
 		}
 	}
 
 	private Intent getAndroidRootIntent(boolean data, boolean official) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			var intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-			intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, this.getUriAndroidRoot(data, official));
+			intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, this.getUriAndroidRoot(data, official, false));
 			return intent;
 		}
 
 		return null;
 	}
 
-	private Uri getUriAndroidRoot(boolean data, boolean official) {
+	private final ActivityResultLauncher<Intent> handleObbUri = this.registerForActivityResult(
+			new ActivityResultContracts.StartActivityForResult(), result -> {
+				var resolver = this.getContentResolver();
+
+				var uriData = result.getData().getData();
+				var flags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+				resolver.takePersistableUriPermission(uriData, flags);
+				this.registerSafRoot(uriData, false);
+			});
+
+	private Uri getUriAndroidRoot(boolean data, boolean official, boolean pubg) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			var manager = (StorageManager) this.getSystemService(Context.STORAGE_SERVICE);
 
@@ -201,7 +205,12 @@ public class MainActivity extends AppCompatActivity {
 
 			Log.d(TAG, "INITIAL_URI scheme: " + scheme);
 
-			scheme = scheme.replace("/root/", "/document/");
+			scheme = scheme.replace("/root/", pubg ? "/tree/" : "/document/");
+			if (pubg) {
+				grantUriPermission(this.getClass().getSimpleName(), (Uri) uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+				grantUriPermission(this.getClass().getSimpleName(), (Uri) uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//				grantUriPermission(this.getClass().getSimpleName(), (Uri) uri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+			}
 
 			startDir = startDir.replace("/", "%2F");
 
@@ -215,4 +224,9 @@ public class MainActivity extends AppCompatActivity {
 
 		return Uri.EMPTY;
 	}
+
+
+
+
+
 }
