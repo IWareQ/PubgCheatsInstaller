@@ -8,7 +8,7 @@ android {
 	defaultConfig {
 		applicationId "ru.iwareq.pci"
 
-		minSdk 23
+		minSdk 24
 		targetSdk 32
 
 		versionCode 1
@@ -19,7 +19,8 @@ android {
 
 	buildTypes {
 		release {
-			minifyEnabled false
+			minifyEnabled true
+			shrinkResources true
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 		}
 

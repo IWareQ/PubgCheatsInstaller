@@ -10,6 +10,16 @@ public class SafRootHelper {
 
 	private static Uri data, obb;
 
+	private static String apkInstallPath;
+
+	public static String getApkInstallPath() {
+		return SafRootHelper.apkInstallPath;
+	}
+
+	public static void setApkInstallPath(String apkInstallPath) {
+		SafRootHelper.apkInstallPath = apkInstallPath;
+	}
+
 	public static AppCompatActivity getContext() {
 		return SafRootHelper.context;
 	}

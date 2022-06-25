@@ -1,6 +1,5 @@
 <resources>
-	<string name="app_name">PubgCheatsInstaller</string>
+	<string name="app_name">Pubg Replacer</string>
 	<string name="select_apk_file_button_text">Выбрать файл</string>
 	<string name="info_text_select_apk_file">Выберите APK файл, который хотите установить</string>
-	<string name="info_text_give_android_permissions">Для начала работы, нужно выдать права к папкам Android/data и Android/obb</string>
 </resources>
