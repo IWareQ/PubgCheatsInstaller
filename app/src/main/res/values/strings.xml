@@ -1,5 +1,10 @@
 <resources>
 	<string name="app_name">Pubg Replacer</string>
+	<string name="pubg_not_installed_title">PUBG Mobile не установлен</string>
+	<string name="pubg_not_installed_text">
+		Для начала работы приложения требуется установить любой PUBG!\n\nВозвращайтесь как только установите.
+	</string>
+	<string name="pubg_not_installed_positive_text">Хорошо</string>
 	<string name="select_apk_file_button_text">Выбрать файл</string>
 	<string name="info_text_select_apk_file">Выберите APK файл, который хотите установить</string>
 </resources>

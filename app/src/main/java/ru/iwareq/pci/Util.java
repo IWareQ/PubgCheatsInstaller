@@ -1,6 +1,7 @@
 package ru.iwareq.pci;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -8,12 +9,22 @@ import android.provider.DocumentsContract;
 
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.viewbinding.BuildConfig;
 
 import java.io.File;
 
 public class Util {
 
 	private static final String TENCENT_PACKAGE = "com.tencent.ig";
+
+	public static boolean isPubgInstalled(PackageManager packageManager) {
+		try {
+			packageManager.getPackageInfo(TENCENT_PACKAGE, 0);
+			return true;
+		} catch (PackageManager.NameNotFoundException exception) {
+			return false;
+		}
+	}
 
 	public static Intent createDeleteIntent() {
 		var intent = new Intent(Intent.ACTION_DELETE);
@@ -24,7 +35,6 @@ public class Util {
 	public static Intent createInstallIntent(String apkPath) {
 		var storage = Environment.getExternalStorageDirectory().toString().replace("file:///", "");
 		var destination = storage + apkPath;
-		var uri = Uri.parse("file:///" + storage + apkPath);
 
 		var contentUri = FileProvider.getUriForFile(
 				SafRootHelper.getContext(),
@@ -34,9 +44,8 @@ public class Util {
 		var install = new Intent(Intent.ACTION_VIEW);
 		install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 		install.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true);
+		// install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true);
 		install.setData(contentUri);
-
 		return install;
 	}
 

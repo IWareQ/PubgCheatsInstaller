@@ -15,6 +15,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import ru.iwareq.pci.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -75,15 +77,23 @@ public class MainActivity extends AppCompatActivity {
 		var binding = ActivityMainBinding.inflate(this.getLayoutInflater());
 		this.setContentView(binding.getRoot());
 
-		this.requestPermissions();
+		if (!Util.isPubgInstalled(this.getPackageManager())) {
+			new MaterialAlertDialogBuilder(this)
+					.setTitle(this.getString(R.string.pubg_not_installed_title))
+					.setMessage(this.getString(R.string.pubg_not_installed_text))
+					.setPositiveButton(this.getString(R.string.pubg_not_installed_positive_text), (dialog, which) -> this.finish())
+					.create().show();
+		} else {
+			this.requestPermissions();
 
-		SafRootHelper.setContext(this);
+			SafRootHelper.setContext(this);
 
-		binding.selectApkFile.setOnClickListener(listener -> {
-			var apkPicker = new Intent(Intent.ACTION_GET_CONTENT);
-			apkPicker.setType("application/*");
-			this.handleSelectedFile.launch(apkPicker);
-		});
+			binding.selectApkFile.setOnClickListener(listener -> {
+				var apkPicker = new Intent(Intent.ACTION_GET_CONTENT);
+				apkPicker.setType("application/*");
+				this.handleSelectedFile.launch(apkPicker);
+			});
+		}
 	}
 
 	private void requestPermissions() {

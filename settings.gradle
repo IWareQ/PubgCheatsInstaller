@@ -14,5 +14,5 @@ dependencyResolutionManagement {
 	}
 }
 
-rootProject.name = "PubgCheatsInstaller"
+rootProject.name = "Pubg Replacer"
 include ':app'

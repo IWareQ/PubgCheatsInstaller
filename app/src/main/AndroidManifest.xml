@@ -3,6 +3,10 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="ru.iwareq.pci">
 
+	<queries>
+		<package android:name="com.tencent.ig"/>
+	</queries>
+
 	<uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES"/>
 	<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
