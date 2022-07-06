@@ -179,3 +179,4 @@ lint/tmp/
 
 /.idea/git_toolbox_prj.xml
 /app/release/
+/.idea/.name
