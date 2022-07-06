@@ -25,8 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private final ActivityResultLauncher<Intent> handleDeleteApk = this.registerForActivityResult(
 			new ActivityResultContracts.StartActivityForResult(), result -> {
-				Util.renameData(true);
-				Util.renameObb(true);
+				Util.renameAllTo(true);
 
 				this.startActivity(Util.createInstallIntent(SafRootHelper.getApkInstallPath()));
 			});
@@ -42,8 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
 					SafRootHelper.setApkInstallPath(resultIntent.getData().getLastPathSegment().replace("primary:", "/"));
 
-					Util.renameData(false);
-					Util.renameObb(false);
+					Util.renameAllTo(false);
 
 					this.handleDeleteApk.launch(Util.createDeleteIntent());
 				}
@@ -90,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
 			binding.selectApkFile.setOnClickListener(listener -> {
 				var apkPicker = new Intent(Intent.ACTION_GET_CONTENT);
-				apkPicker.setType("application/*");
+				apkPicker.setType("application/vnd.android.package-archive");
 				this.handleSelectedFile.launch(apkPicker);
 			});
 		}

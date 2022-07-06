@@ -9,7 +9,6 @@ import android.provider.DocumentsContract;
 
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.viewbinding.BuildConfig;
 
 import java.io.File;
 
@@ -44,7 +43,6 @@ public class Util {
 		var install = new Intent(Intent.ACTION_VIEW);
 		install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 		install.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		// install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true);
 		install.setData(contentUri);
 		return install;
 	}
@@ -61,21 +59,16 @@ public class Util {
 		return null;
 	}
 
-	public static void renameData(boolean toOfficialName) {
-		var document = DocumentFile.fromTreeUri(SafRootHelper.getContext(), SafRootHelper.getData());
-		if (document != null) {
-			Util.rename(toOfficialName, document);
+	public static void renameAllTo(boolean toOfficialName) {
+		var dataDocument = DocumentFile.fromTreeUri(SafRootHelper.getContext(), SafRootHelper.getData());
+		var obbDocument = DocumentFile.fromTreeUri(SafRootHelper.getContext(), SafRootHelper.getObb());
+		if (dataDocument != null && obbDocument != null) {
+			Util.renameTo(toOfficialName, dataDocument);
+			Util.renameTo(toOfficialName, obbDocument);
 		}
 	}
 
-	public static void renameObb(boolean toOfficialName) {
-		var document = DocumentFile.fromTreeUri(SafRootHelper.getContext(), SafRootHelper.getObb());
-		if (document != null) {
-			Util.rename(toOfficialName, document);
-		}
-	}
-
-	private static void rename(boolean toOfficialName, DocumentFile document) {
+	private static void renameTo(boolean toOfficialName, DocumentFile document) {
 		var nextDocument = document.findFile(toOfficialName ? TENCENT_PACKAGE + "g" : TENCENT_PACKAGE);
 		if (nextDocument != null) {
 			nextDocument.renameTo(toOfficialName ? TENCENT_PACKAGE : TENCENT_PACKAGE + "g");
